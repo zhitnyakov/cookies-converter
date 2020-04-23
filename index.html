@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+        integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+    <title>Cookie Converter</title>
+</head>
+
+<body class="pt-5">
+    <div class="container" id="app">
+        <div class="row">
+            <div class="col-5">
+                <textarea class="form-control" rows="15" v-model="netscape"></textarea>
+            </div>
+            <div class="col-2 text-center">
+                <div>
+                    <button class="btn btn-primary" @click="NetscapeToJson">Netscape &rarr;</button>
+                </div>
+                <div class="mt-1">
+                    <button class="btn btn-primary" @click="JsonToNetscape">&larr; JSON</button>
+                </div>
+            </div>
+            <div class="col-5">
+                <textarea class="form-control" rows="15" v-model="json"></textarea>
+            </div>
+        </div>
+    </div>
+
+    <!-- development version, includes helpful console warnings -->
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+    <script>
+        var app = new Vue({
+            el: '#app',
+
+            data: {
+                netscape: '',
+                json: '',
+            },
+
+            methods: {
+                JsonToNetscape() {
+                    const data = JSON.parse(this.json);
+                    if (data) {
+                        this.netscape = '';
+                        data.forEach((row) => {
+                            if (typeof row.value === 'undefined') return;
+                            this.netscape +=
+                                `${row.domain}\t${row.httpOnly.toString().toUpperCase()}\t${row.path}\t${row.secure.toString().toUpperCase()}\t${row.expirationDate}\t${row.name}\t${row.value}\n`;
+                        });
+                    }
+                },
+
+                NetscapeToJson() {
+                    const data = this.netscape;
+                    const lines = data.split('\n');
+                    let result = [];
+                    lines.forEach(line => {
+                        const parts = line.split('\t');
+                        let row = {};
+                        row.domain = typeof parts[0] === 'undefined' ? null : parts[0];
+                        row.httpOnly = typeof parts[1] === 'undefined' ? null : parts[1] === 'TRUE' ?
+                            true : false;
+                        row.path = typeof parts[2] === 'undefined' ? null : parts[2];
+                        row.secure = typeof parts[3] === 'undefined' ? null : parts[3] === 'TRUE' ?
+                            true : false;
+                        row.expirationDate = typeof parts[4] === 'undefined' ?
+                            null : parseInt(parts[4]);
+                        row.name = typeof parts[5] === 'undefined' ? null : parts[5];
+                        row.value = typeof parts[6] === 'undefined' ? null : parts[6];
+
+                        result.push(row);
+                    });
+
+                    this.json = JSON.stringify(result);
+                }
+            }
+        })
+    </script>
+    <style>
+        textarea {
+            width: 100%;
+        }
+    </style>
+</body>
+
+</html>
